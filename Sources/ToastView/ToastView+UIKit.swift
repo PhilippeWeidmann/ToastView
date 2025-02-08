@@ -5,6 +5,7 @@
 //  Created by Philippe Weidmann on 22.10.2023.
 //
 
+#if canImport(UIKit)
 import OSLog
 import SwiftUI
 import UIKit
@@ -42,3 +43,5 @@ public class ToastPresenter {
     }))
     return button
 }
+
+#endif

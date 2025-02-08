@@ -33,11 +33,16 @@ struct ToastView: View {
         .onAppear {
             guard !isShowing else { return }
             withAnimation(.bouncy.speed(3)) {
+                #if canImport(UIKit)
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
+                #endif
                 isShowing = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                if #available(iOS 17.0, *) {
+
+            Task {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+
+                if #available(iOS 17.0, macOS 14.0, *) {
                     withAnimation(.easeInOut(duration: 0.15)) {
                         isShowing = false
                     } completion: {
@@ -47,15 +52,16 @@ struct ToastView: View {
                     withAnimation(.easeInOut(duration: 0.15)) {
                         isShowing = false
                     }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        onDisappear()
-                    }
+
+                    try await Task.sleep(nanoseconds: 150_000_000)
+                    onDisappear()
                 }
             }
         }
     }
 }
 
+#if canImport(UIKit)
 struct WindowSceneProviderViewRepresentable: UIViewRepresentable {
     let title: String?
     let icon: Image?
@@ -65,22 +71,34 @@ struct WindowSceneProviderViewRepresentable: UIViewRepresentable {
         return WindowSceneProviderView(text: title, icon: icon, onDisappear: onDisappear)
     }
 
-    func updateUIView(_ uiView: WindowSceneProviderView, context: Context) {}
+    func updateUIView(_ view: WindowSceneProviderView, context: Context) {}
 }
 
-#Preview {
-    struct PreviewWrapper: View {
-        @State var isShowing = false
+#elseif canImport(AppKit)
 
-        var body: some View {
-            VStack {
-                Spacer()
-                Button("Show Toast") {
-                    isShowing.toggle()
-                }
-            }
-            .toast(isPresented: $isShowing, title: "Toast", icon: Image(systemName: "checkmark.circle"))
+struct WindowSceneProviderViewRepresentable: NSViewRepresentable {
+    let title: String?
+    let icon: Image?
+    let onDisappear: () -> Void
+
+    func makeNSView(context: Context) -> WindowSceneProviderView {
+        return WindowSceneProviderView(text: title, icon: icon, onDisappear: onDisappear)
+    }
+
+    func updateNSView(_ view: WindowSceneProviderView, context: Context) {}
+}
+#endif
+
+@available(iOS 17.0, macOS 14.0, *)
+#Preview {
+    @Previewable @State var isShowing = false
+
+    VStack {
+        Button("Show Toast") {
+            isShowing.toggle()
         }
     }
-    return PreviewWrapper()
+    .frame(width: 400, height: 400)
+    .background(Color.white)
+    .toast(isPresented: $isShowing, title: "Toast", icon: Image(systemName: "checkmark.circle"))
 }
