@@ -10,6 +10,7 @@ import OSLog
 import SwiftUI
 import UIKit
 
+@MainActor
 public class ToastPresenter {
     static let logger = Logger(subsystem: "ToastView", category: "ToastPresenter")
 
