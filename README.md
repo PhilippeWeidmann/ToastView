@@ -1,5 +1,5 @@
 # ToastView
-Present a small toast as seen in the Apple Music App  
+Present a small toast as seen in the Apple Music App. Available both for iOS and macOS.  
 ![Toast](./Screenshots/toast.png)
 
 # Usage
@@ -30,7 +30,7 @@ var body: some View {
 }
 ```
 
-## UIKit
+## UIKit / AppKit
 
 Call `ToastPresenter.show`. You need to provide an origin view so that the toast knows in which WindowScene it is presented.  
 You can provide an optional title and/or image.  
